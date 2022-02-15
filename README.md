@@ -1,2 +1,3 @@
 # sturdy-system
-azure learing
+learning python-flask-angular
+also learning to deploy to azure cloud
