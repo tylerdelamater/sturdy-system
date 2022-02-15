@@ -12,7 +12,7 @@ CORS(app)
 Base.metadata.create_all(engine)
 
 
-@app.route('/exams')
+@app.route('/exams', methods=['GET'])
 def get_exams():
     # fetching from the database
     session = Session()
@@ -24,7 +24,7 @@ def get_exams():
 
     # serializing as JSON
     session.close()
-    return jsonify(exams.data)
+    return jsonify(exams)
 
 
 @app.route('/exams', methods=['POST'])
@@ -33,7 +33,7 @@ def add_exam():
     posted_exam = ExamSchema(only=('title', 'description'))\
         .load(request.get_json())
 
-    exam = Exam(**posted_exam.data, created_by="HTTP post request")
+    exam = Exam(**posted_exam, created_by="HTTP post request")
 
     # persist exam
     session = Session()
@@ -41,6 +41,6 @@ def add_exam():
     session.commit()
 
     # return created exam
-    new_exam = ExamSchema().dump(exam).data
+    new_exam = ExamSchema().dump(exam)
     session.close()
     return jsonify(new_exam), 201
