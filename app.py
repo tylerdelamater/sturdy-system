@@ -44,3 +44,6 @@ def add_exam():
     new_exam = ExamSchema().dump(exam)
     session.close()
     return jsonify(new_exam), 201
+
+if __name__ == '__main__':
+   app.run()
