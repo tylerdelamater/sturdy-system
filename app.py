@@ -1,49 +1,14 @@
-# coding=utf-8
-
-from flask import Flask, jsonify, request
+from flask import Flask
+from flask import jsonify
 from flask_cors import CORS
-from src.entities.entity import Session, engine, Base
-from src.entities.exam import Exam, ExamSchema
 
-# creating the Flask application
 app = Flask(__name__)
+
 CORS(app)
-# if needed, generate database schema
-Base.metadata.create_all(engine)
 
-
-@app.route('/exams', methods=['GET'])
-def get_exams():
-    # fetching from the database
-    session = Session()
-    exam_objects = session.query(Exam).all()
-
-    # transforming into JSON-serializable objects
-    schema = ExamSchema(many=True)
-    exams = schema.dump(exam_objects)
-
-    # serializing as JSON
-    session.close()
-    return jsonify(exams)
-
-
-@app.route('/exams', methods=['POST'])
-def add_exam():
-    # mount exam object
-    posted_exam = ExamSchema(only=('title', 'description'))\
-        .load(request.get_json())
-
-    exam = Exam(**posted_exam, created_by="HTTP post request")
-
-    # persist exam
-    session = Session()
-    session.add(exam)
-    session.commit()
-
-    # return created exam
-    new_exam = ExamSchema().dump(exam)
-    session.close()
-    return jsonify(new_exam), 201
+@app.route('/getmap/', methods=['GET', 'POST'])
+def getmap():
+    return jsonify({'id':'1234','name':'Gabba Gabba Hey', 'venue':'Madison Square Garden', 'performer':"Ramones", "when":"16MAY1993"})
 
 if __name__ == '__main__':
-   app.run()
+    app.run(host='0.0.0.0', port=105)
