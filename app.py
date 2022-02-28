@@ -3,7 +3,6 @@ import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
-from bson.json_util import dumps
 
 app = Flask(__name__)
 prod = False
