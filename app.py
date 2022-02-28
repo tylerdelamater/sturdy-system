@@ -8,13 +8,13 @@ root_dir = os.path.dirname(__file__)
 CORS(app)
 
 def readHeroesFile() :
-    print(root_dir)
-    with open(root_dir + "/out/heroes.json", "r") as heroesfile:
+    print(os.path.join(root_dir, "out", "heroes.json"))
+    with open(os.path.join(root_dir, "out", "heroes.json"), "r") as heroesfile:
         data=heroesfile.read()
     return json.loads(data)
 
 def writeHeroesFile(heroesList) :
-    with open(root_dir + "/out/heroes.json", "w") as jsonFile:
+    with open(os.path.join(root_dir, "out", "heroes.json"), "w") as jsonFile:
             json.dump(heroesList, jsonFile)
 
 # GET /heroes/{id} to return a specific Hero
@@ -54,10 +54,10 @@ def createHero():
 
 if __name__ == "__main__":
     #seed the heroes.json file with the template if it doesn"t exist
-    if not os.path.exists(root_dir + "/out/heroes.json"):
-        with open(root_dir + "/out/heroes-template.json", "r") as templatefile:
+    if not os.path.exists(os.path.join(root_dir, "out", "heroes.json")):
+        with open(os.path.join(root_dir, "out", "heroes-template.json"), "r") as templatefile:
             templatefiledata=templatefile.read()
-        with open(root_dir + "/out/heroes.json", "w") as newfile:
+        with open(os.path.join(root_dir, "out", "heroes.json"), "w") as newfile:
             newfile.write(templatefiledata)
 
     app.run(host="0.0.0.0", port=80)
