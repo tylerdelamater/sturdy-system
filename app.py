@@ -4,19 +4,17 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-
+root_dir = os.path.dirname(__file__)
 CORS(app)
 
 def readHeroesFile() :
-    script_dir = os.path.dirname(__file__)
-    print(script_dir)
-    with open(script_dir + "/out/heroes.json", "r") as heroesfile:
+    print(root_dir)
+    with open(root_dir + "/out/heroes.json", "r") as heroesfile:
         data=heroesfile.read()
     return json.loads(data)
 
 def writeHeroesFile(heroesList) :
-    script_dir = os.path.dirname(__file__)
-    with open(script_dir + "/out/heroes.json", "w") as jsonFile:
+    with open(root_dir + "/out/heroes.json", "w") as jsonFile:
             json.dump(heroesList, jsonFile)
 
 # GET /heroes/{id} to return a specific Hero
@@ -56,10 +54,10 @@ def createHero():
 
 if __name__ == "__main__":
     #seed the heroes.json file with the template if it doesn"t exist
-    if not os.path.exists("out/heroes.json"):
-        with open("out/heroes-template.json", "r") as templatefile:
+    if not os.path.exists(root_dir + "/out/heroes.json"):
+        with open(root_dir + "/out/heroes-template.json", "r") as templatefile:
             templatefiledata=templatefile.read()
-        with open("out/heroes.json", "w") as newfile:
+        with open(root_dir + "/out/heroes.json", "w") as newfile:
             newfile.write(templatefiledata)
 
     app.run(host="0.0.0.0", port=80)
