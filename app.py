@@ -83,14 +83,45 @@ def seedevents():
     params = {'venueId': venueId, 'apikey': apiKey}
     response = requests.get(tickmaster_url, headers=headers, params=params, verify=False)
     response.raise_for_status()
-    events = response.json()["_embedded"]["events"]
+    responsejson = response.json()
+    events = responsejson["_embedded"]["events"]
     for event in events :
-        name = event["name"]
-        id = event["id"]
-        url = event["url"]
-        startTime = event["dates"]["start"]["dateTime"]
-        post = { "id":id, "name":name, "url":str(url), "startTime":str(startTime)}
-        colticketmasterevents.insert_one(post).inserted_id
+        status = event["dates"]["status"]["code"]
+        if status == "onsale" :
+            name = event["name"]
+            id = event["id"]
+            url = event["url"]
+            startTime = event["dates"]["start"]["dateTime"]
+            post = { "id":id, "name":name, "url":str(url)}
+            if startTime :
+                post["startTime"] = str(startTime)
+            colticketmasterevents.insert_one(post).inserted_id
+    #check the response to see how many reamining pages there are in the pagination
+    #and call again for each page
+    totalpages = responsejson["page"]["totalPages"]
+    print(totalpages)
+    if totalpages > 1:
+        for i in range(1, totalpages):
+            if i > 10 : 
+                continue #lets set a hard limit of 10 requests
+            params["page"] = i
+            response = requests.get(tickmaster_url, headers=headers, params=params, verify=False)
+            response.raise_for_status()
+            responsejson = response.json()
+            events = responsejson["_embedded"]["events"]
+            for event in events :
+                status = event["dates"]["status"]["code"]
+                if status == "onsale" :
+                    name = event["name"]
+                    id = event["id"]
+                    url = event["url"]
+                    post = { "id":id, "name":name, "url":str(url)}
+                    if "dateTime" in event["dates"]["start"].keys() :
+                        startTime = event["dates"]["start"]["dateTime"]
+                        post["startTime"] = str(startTime)
+                    else :
+                        post["startTime"] = "TBD"
+                    colticketmasterevents.insert_one(post).inserted_id
     return jsonify({})
 
 @app.route("/events", methods=["GET"])
