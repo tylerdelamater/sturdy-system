@@ -1,23 +1,26 @@
 import os.path
 import json
+import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
+from bson import ObjectId 
+
 
 app = Flask(__name__)
-prod = False
-if os.getenv("APP_PATH") :
-    prod = True
+useMongo = True
+if useMongo :
     client = MongoClient(r"mongodb://final200meters:zdYYRBK8jRehhhFDAY6ZPoWUnrUQodXZ7bWqTBqud492KliiiNsjBF66ZFURpI2Uctcmz08X9WcgVImB6BBJYg==@final200meters.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@final200meters@")
     db = client.mymongodb 
-    heroescollection = db.heroescollection 
+    heroescollection = db.heroescollection
+    colticketmasterevents = db.ticketmasterevents
 else :
     root_dir = os.path.dirname(__file__)
 
 CORS(app)
 
 def readHeroes() :
-    if prod :
+    if useMongo :
         data = heroescollection.find()
         print(type(data))
         print(dir(data))
@@ -70,8 +73,43 @@ def createHero():
 # GET /heroes/search/name?contains={string} to search for Heroes
 # GET /heroes/search/name?contains={string} to search for Heroes
 
+@app.route("/seedevents", methods=["GET"])
+def seedevents():
+    apiKey = 'cFaY8gBrFpniYpztVKtGGrVj4ShdD3pq'
+    venueId = 'KovZ917AOAw'
+    endpoint = 'https://app.ticketmaster.com/discovery/v2/'    
+    tickmaster_url = endpoint + "events.json"
+    headers = {}
+    params = {'venueId': venueId, 'apikey': apiKey}
+    response = requests.get(tickmaster_url, headers=headers, params=params, verify=False)
+    response.raise_for_status()
+    events = response.json()["_embedded"]["events"]
+    for event in events :
+        name = event["name"]
+        id = event["id"]
+        url = event["url"]
+        startTime = event["dates"]["start"]["dateTime"]
+        post = { "id":id, "name":name, "url":str(url), "startTime":str(startTime)}
+        colticketmasterevents.insert_one(post).inserted_id
+    return jsonify({})
+
+@app.route("/events", methods=["GET"])
+def getEvents() :
+    data = colticketmasterevents.find()
+    events = []
+    for item in data :
+        events.append({"id":item["id"], "name":item["name"],"url":item["url"], "startTime":item["startTime"]})
+    return jsonify(events)
+
+@app.route("/events/<event_id>", methods=["GET"])
+def getEvent(event_id=0):
+    item = colticketmasterevents.find_one({"id": str(event_id)})
+    event = {"id":item["id"], "name":item["name"],"url":item["url"], "startTime":item["startTime"]}
+    return jsonify(event)
+
+
 if __name__ == "__main__":
-    if prod : 
+    if useMongo : 
         print("no files only mongo")
     else :
         #seed the heroes.json file with the template if it doesn"t exist
@@ -82,4 +120,3 @@ if __name__ == "__main__":
                 newfile.write(templatefiledata)
 
     app.run(host="0.0.0.0", port=80)
-    
