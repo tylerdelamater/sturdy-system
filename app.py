@@ -26,7 +26,7 @@ def seedevents():
     endpoint = 'https://app.ticketmaster.com/discovery/v2/'    
     tickmaster_url = endpoint + "events.json"
     headers = {}
-    params = {'venueId': venueId, 'apikey': apiKey}
+    params = {'venueId': venueId, 'apikey': apikey}
     response = requests.get(tickmaster_url, headers=headers, params=params, verify=False)
     response.raise_for_status()
     responsejson = response.json()
