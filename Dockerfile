@@ -1,9 +1,11 @@
-FROM python:3.8
-
-RUN mkdir /code
-WORKDIR /code
-ADD . /code/
-RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host=files.pythonhosted.org -r requirements.txt
-
-EXPOSE 5000
-CMD ["python", "/code/app.py"]
+FROM python:3.10-slim-bullseye 
+#RUN apt-get update -y && \
+#    apt-get install -y python3-pip python3
+# We copy just the requirements.txt first to leverage Docker cache
+COPY ./requirements.txt /app/requirements.txt
+WORKDIR /app
+RUN pip install -r requirements.txt
+COPY . /app
+EXPOSE 8080
+ENTRYPOINT [ "python3" ]
+CMD [ "app.py" ]
