@@ -84,6 +84,5 @@ def getEvent(event_id=0):
     event = {"id":item["id"], "name":item["name"],"url":item["url"], "startTime":item["startTime"]}
     return jsonify(event)
 
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
