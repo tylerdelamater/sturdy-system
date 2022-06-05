@@ -1,0 +1,9 @@
+uses: azure/docker-login@v1
+  with:
+    login-server: sturdysystemcr.azurecr.io
+    username: ${{ secrets.REGISTRY_USERNAME }}
+    password: ${{ secrets.REGISTRY_PASSWORD }}
+    
+run: |
+    docker build . -t sturdysystemcr.azurecr.io/sturdy-system-u:${{ github.sha }}
+    docker push sturdysystemcr.azurecr.io/sturdy-system-u:${{ github.sha }}
